@@ -24,7 +24,7 @@ TAM:
 
 
 PAR:
-        addi $s4, $s4,1;
+        addi $s4, $s4,1
         j MEIO
 
 
@@ -34,7 +34,7 @@ INICIO:
 MEIO:
         mult $s4,$s3
         MFHI $s6
-        
+
 
 FIM:
 
