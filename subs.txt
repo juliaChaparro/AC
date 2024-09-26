@@ -1,0 +1,10 @@
+    
+    .code
+
+addi $t1,$zero,2
+jal sucessor
+syscall 0
+
+sucessor:
+    addi $t1,$t1,1
+    jr $ra
