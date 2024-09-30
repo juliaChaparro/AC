@@ -1,0 +1,46 @@
+    .data 
+ 
+pi: .double 0
+
+format_str:     .asciiz "%i\n"
+params_sys5:    .space 8 
+num:            .space 8
+
+
+    .code
+
+SETUP:
+
+    l.d $t1, double($zero)
+    addi $s5, $zero,4 ; s5 vai receber 4
+    addi $s6, $zero,1 ; s6 vai ter 1
+
+    daddi $a0, $zero ,format_str
+    sw %a0,params_sys5($zero)
+    addi %t6, $zero,params_sys5
+    addi $s1 ,$zero 0
+    addi $s2, $zero,10 
+
+LOOP:
+    BNE $s1,$s2,incremento
+    syscall 0
+
+incremento:
+
+    addi $s1,$1s1,1
+    sw $s1,num($zero)
+    syscall 5
+    j LOOP
+
+
+
+
+
+
+
+
+
+
+
+
+
