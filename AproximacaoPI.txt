@@ -1,46 +1,55 @@
-    .data 
- 
-pi: .double 0
+.data 
+format_str:     .asciiz "%i\n"          ; Formato para impressão de inteiros
+result:         .space 8                ; Espaço para armazenar o valor aproximado de Pi
+hundred_thousand: .double 100000.0      ; Valor 100000.0
+four:           .double 4.0             ; Valor 4.0
 
-format_str:     .asciiz "%i\n"
-params_sys5:    .space 8 
-num:            .space 8
-
-
-    .code
+.code
 
 SETUP:
-
-    l.d $t1, double($zero)
-    addi $s5, $zero,4 ; s5 vai receber 4
-    addi $s6, $zero,1 ; s6 vai ter 1
-
-    daddi $a0, $zero ,format_str
-    sw %a0,params_sys5($zero)
-    addi %t6, $zero,params_sys5
-    addi $s1 ,$zero 0
-    addi $s2, $zero,10 
+    addi $s1, $zero, 0                  ; Inicializa $s1 (contador de iterações)
+    addi $s5, $zero, 1                  ; Inicializa $s5 com 1 (denominador)
+    l.d f3, 0($zero)                   ; Inicializa f3 com 0.0 (valor acumulado)
+    daddi $s2, $zero, 1000              ; Reduz o limite do loop para 1000 iterações
 
 LOOP:
-    BNE $s1,$s2,incremento
-    syscall 0
+    slt $v1, $s1, $s2                   ; Compara $s1 < $s2
+    beq $v1, $zero, FIM                 ; Se $s1 >= $s2, vai para FIM
 
-incremento:
+    ; Verifica se o número é par ou ímpar usando AND bit a bit
+    andi $s6, $s1, 1                    ; Aplica uma máscara de bits ($s6 = $s1 & 1)
+    beqz $s6, SUBTRAIR                  ; Se o último bit for 0, subtrai (par)
+    j SOMAR                             ; Senão, soma (ímpar)
 
-    addi $s1,$1s1,1
-    sw $s1,num($zero)
-    syscall 5
-    j LOOP
+SOMAR:
+    div.d f8, f0, f5                  ; f8 = 1.0 / $s5 (calcula o termo)
+    add.d f3, f3, f8                 ; f3 = f3 + $f8 (acumula o valor)
+    j INCREMENTO                        ; Vai para o incremento
 
+SUBTRAIR:
+    div.d f8, f0, f5                 ; f8 = 1.0 / $s5
+    sub.d f3, f3, f8                 ; f3 = f3 - $f8
+    j INCREMENTO                        ; Vai para o incremento
 
+INCREMENTO:
+    addi $s1, $s1, 1                    ; Incrementa o contador de iterações $s1
+    addi $s5, $s5, 2                    ; Incrementa o denominador ($s5 = 1, 3, 5, ...)
+    j LOOP                              ; Volta para o início do loop
 
+FIM:
+    ; Multiplica o valor acumulado por 4 para obter a aproximação final de Pi
+    l.d f4, four($zero)                ; Carrega o valor 4.0 em $f4
+    mul.d f3, f3, f4                 ; f3 = f3 * 4 (aproximação final de Pi)
 
+    ; Multiplica o valor por 100000 para preservar 5 casas decimais e converte para inteiro
+    l.d f4, hundred_thousand($zero)    ; Carrega o valor 100000.0 em $f4
+    mul.d f3, f3, f4                 ; Multiplica Pi aproximado por 100000
+    cvt.w.d f3, f3                    ; Converte o valor de double para inteiro
 
+    ; Armazena diretamente o valor de Pi aproximado em 'result'
+    s.d f3, result($zero)              ; Armazena o valor inteiro de f3 na memória
+    daddi $a0, $zero, format_str        ; Carrega o endereço da string de formato em $a0
+    daddi $a1, $zero, result            ; Carrega o endereço do resultado em $a1
+    syscall 5                           ; Chama syscall 5 para imprimir o valor de Pi
 
-
-
-
-
-
-
-
+    syscall 0                           ; Finaliza o programa

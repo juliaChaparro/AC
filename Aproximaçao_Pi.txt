@@ -1,0 +1,65 @@
+    .data 
+ 
+pi: .double 3.0
+
+format_str:     .asciiz "%i\n"
+params_sys5:    .space 8 
+num:            .space 8
+
+
+    .code
+
+SETUP:
+
+    addi $s0, $s0, 4
+    
+    l.d f1, double($s0)
+
+    l.d f3, double($zero) ; vai acumular os resultados da divisao
+    
+
+    addi $s1 ,$zero 0 ; faz parte dp for(vou ter que ver se ele é par ou impa)
+   
+    addi $s3 ,$zero 1 ; vai usar como somador
+    addi $s4 ,$zero 2 ; vai ser usado como somador
+
+    add $s5 , $s3, s4 ; s5 vai somar para ser "numero de baixo"
+
+    l.d f2, double($s5) ;fazer uma forma de ir somando... 
+
+    addi $s1, $zero,0
+    addi $s2, $zero,10000
+
+    div $s1, $s2 ; vai dividir se é par ou nao;
+    MFHI $s6
+    BEQZ $S6, PAR
+    BNEZ $S6, IMPAR
+    
+
+LOOP:
+
+    BNE $s1,$s2,incremento
+    syscall 0
+
+
+incremento:
+
+    addi $s1,$s1,1
+    sw $s1,num($zero)
+    syscall 5
+    j LOOP
+
+PAR:
+ 
+   div.d f8, f1, f2
+   add.d f3, f3, f8
+   j SETUP
+         
+
+IMPAR:
+
+    div.d f8, f1, f2
+    sub.d f3, f3, f8
+    j SETUP
+
+
