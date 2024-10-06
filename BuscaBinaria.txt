@@ -1,5 +1,6 @@
 
     .data 
+    
 TAM_VET: .word32 2 ; vai ser o tamanho do vetor 
 VETOR: .word32 1,9 ; vai ser quais elementos tem no meu vetor 
 CHAVE: .word32 8 ; qual eh a chave que voce quer encontrar 
@@ -52,6 +53,7 @@ ACHOU: ;
 
 N_ACHOU:
     daddi $a0,$zero,N_ACHOU
+    
     j PRINT
 
 PRINT: ; vai colocar na tela o que colocado nos registradores 

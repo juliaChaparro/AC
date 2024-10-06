@@ -1,0 +1,118 @@
+;-------------------------------------------------------------------------;
+;Aluna: Julia Evelyn Chaparro Ferreira                                    ;
+; a formula ultilizada para a aproximação de PI foi a NILAKANTHA SERIES   ;
+;-------------------------------------------------------------------------;
+.data 
+
+msg:            .asciiz "%d.%d\n"
+quatro:         .double 4.0
+tres:           .double 3.0
+cem_mil:        .double 100000 
+
+params_sys5:    .space 8
+
+maisUma:        .space 8  ; vai armazemar o resultados
+maisOutra:      .space 8  ; vai armazemar o resultados
+
+.code ;vao receber o valor que vamos ultilizar no programa
+
+    l.d f4,tres($zero)        ; f4 vai ter o meu 3 da soma
+
+    l.d f2, quatro($zero)     ; ta com o 4
+
+    addi $s3, $zero,1         ; vai ser a variavel de vai ficar somando 2
+
+    addi $s4, $zero,0         ; vai ser o valor fixo para soma 2 primeiro numero
+
+    addi $s5,$zero,1          ; vai ser o segundo numero
+    
+    addi $s6,$zero,2          ; vai ser o terceiro numero
+    
+
+    addi $t9, $zero,26
+    addi $t8, $zero,0
+    BNE $t8,$t9, for
+
+
+for: ; este for vai somar e subtrair quantas vezes o comando pede ate ficar o mais proximo de pi 
+;----------------------------------------------------------------------;
+
+    addi $s4, $s4,2         ; vai addi mais +2 no primeiro regiter 
+    addi $s5, $s5,2         ; vai addi mais +2 no primeiro regiter
+    addi $s6, $s6,2         ; vai addi mais +2 no primeiro regiter
+    
+;----------------------------------------------------------------------;  
+    mult $s4, $s5
+    mflo $t0
+    
+    mult $t0, $s6
+    mflo $t1
+
+    DMTC1 $t1 , f1          ; Move o valor inteiro de $t1 para o registrador de ponto flutuante f1
+    CVT.D.L f1, f1 
+
+    div.d f3, f2, f1        ; f3 resultado da minha divisao 
+
+    add.d f8, f8, f3        ; Acumula o valor de f3 em f8 (soma f3 a f8)
+;---------------------------------------------------------------------;
+
+    addi $s4, $s4,2         ; vai addi mais +2 no primeiro regiter 
+    addi $s5, $s5,2         ; vai addi mais +2 no segundo regiter
+    addi $s6, $s6,2         ; vai addi mais +2 no terceiro regiter   
+
+;---------------------------------------------------------------------;
+    mult $s4, $s5                 ; faz as Multiplicaçao dos registetros s4,s5 e s6
+    mflo $t0
+
+    mult $t0, $s6                   
+    mflo $t1
+
+    DMTC1 $t1 , f1                ;mudar de inteio para ponto flutuante
+    CVT.D.L f1, f1 
+
+    div.d f3, f2, f1             ; f3 resultado da minha divisao 
+
+
+    sub.d f8, f8, f3             ; Subtrai o valor de f3 de f8, acumulando o resultado em f8
+;---------------------------------------------------------------------;    
+    addi $t8,$t8,1               ; vai somar no for
+    BNE $t8,$t9, for
+    BEQ $t8,$t9, QUASE_FIM
+
+
+QUASE_FIM: ; vai fazer os ultimos passos para o fim
+
+    add.d f5, f4, f8            ; f5 é a aproximação final de pi
+    CVT.L.D f5, f5              ; converte f5 de double para long
+    DMFC1 $k0, f5               ; move o valor de f5 para $k0 (inteiro)
+
+
+
+    l.d f9, cem_mil($zero)
+
+    mul.d f9, f8,f9             ; Multiplica o valor de f8 pelo valor de f9 e armazena o resultado em f9
+    cvt.w.d f10,f9
+    DMFC1 $k1, f10              ; Move o valor convertido de f10 para o registrador $k1
+
+
+PRINT: 
+    ; vai carregar os valor para os registradores mostrados e fazer o print para o usuario  
+    ;vai colocar na tela o que colocado nos registradores 
+    
+    sw $k0, maisUma($zero)
+    sw $k1, maisOutra($zero)
+
+    daddi $a0,$zero,msg
+    
+    sw $a0, params_sys5($zero)
+
+    addi $t6,$zero,params_sys5
+
+    syscall 5
+    syscall 0
+
+
+
+
+
+
